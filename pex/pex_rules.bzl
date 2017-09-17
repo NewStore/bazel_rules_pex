@@ -172,6 +172,7 @@ def _gen_manifest(py, runfiles, strip_pex_path_prefixes):
 def _pex_binary_impl(ctx):
   strip_pex_path_prefixes = ctx.attr.strip_pex_path_prefixes
   transitive_files = depset(ctx.files.srcs)
+  strip_pex_path_prefixes = ctx.attr.strip_pex_path_prefixes
 
   if ctx.attr.entrypoint and ctx.file.main:
     fail("Please specify either entrypoint or main, not both.")
