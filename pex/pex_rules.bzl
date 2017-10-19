@@ -175,9 +175,15 @@ def _pex_binary_impl(ctx):
 
   if ctx.attr.entrypoint and ctx.file.main:
     fail("Please specify either entrypoint or main, not both.")
+  if ctx.attr.entrypoint and ctx.attr.script:
+    fail("Please specify either entrypoint or script, not both.")
+
   if ctx.attr.entrypoint:
     main_file = None
     main_pkg = ctx.attr.entrypoint
+  elif ctx.attr.script:
+    main_file = None
+    main_pkg = None
   elif ctx.file.main:
     main_file = ctx.file.main
   else:
@@ -233,9 +239,12 @@ def _pex_binary_impl(ctx):
     arguments += ["--find-links", egg.dirname]
   if ctx.attr.cache_dir:
      arguments += ["--cache-dir", ctx.attr.cache_dir]
+  if ctx.attr.script:
+     arguments += ["--script", ctx.attr.script]
+  else:
+     arguments += ["--entry-point", main_pkg]
   arguments += [
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
-      "--entry-point", main_pkg,
       "--output-file", deploy_pex.path,
       manifest_file.path,
   ]
@@ -375,6 +384,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
     "main": attr.label(allow_files = True,
                        single_file = True),
     "entrypoint": attr.string(),
+    "script": attr.string(),
     "interpreter": attr.string(),
     "pex_use_wheels": attr.bool(default=True),
     "pex_verbosity": attr.int(default=0),
@@ -503,7 +513,7 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
 
   Almost all of the attributes that can be used with pex_test work identically
   here, including those not specifically mentioned in this docstring.
-  Exceptions are `main` and `entrypoint`, which cannot be used with this macro.
+  Exceptions are `main` and `entrypoint` and `script`, which cannot be used with this macro.
 
   Args:
 
@@ -513,6 +523,8 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
     fail("Specifying a `main` file makes no sense for pex_pytest.")
   if "entrypoint" in kwargs:
     fail("Do not specify `entrypoint` for pex_pytest.")
+  if "script" in kwargs:
+    fail("Do not specify `script` for pex_pytest.")
 
   pex_binary(
       name = "%s_runner" % name,
