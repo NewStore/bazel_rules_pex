@@ -231,6 +231,8 @@ def _pex_binary_impl(ctx):
     arguments += ["--no-index"]
   if ctx.attr.disable_cache:
     arguments += ["--disable-cache"]
+  if ctx.attr.platform:
+    arguments += ["--platform", ctx.attr.platform]
   for req_file in ctx.files.req_files:
     arguments += ["--requirement", req_file.path]
   for repo in repos:
@@ -363,6 +365,8 @@ pex_attrs = {
     "data": attr.label_list(allow_files = True,
                             cfg = "data"),
     "cache_dir": attr.string(),
+    "platform": attr.string(),
+
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
         default = Label("//pex:pex_wrapper"),
