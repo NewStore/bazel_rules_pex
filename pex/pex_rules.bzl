@@ -250,6 +250,7 @@ def _pex_binary_impl(ctx):
       "--output-file", deploy_pex.path,
       manifest_file.path,
   ]
+  print(arguments)
 
   # form the inputs to pex builder
   _inputs = (
